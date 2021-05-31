@@ -6,8 +6,8 @@
  * @link       https://www.wplauncher.com
  * @since      1.0.0
  *
- * @package    Settings_Page
- * @subpackage Settings_Page/includes
+ * @package    TCR_Calendar
+ * @subpackage TCR_Calendar/includes
  */
 
 /**
@@ -16,11 +16,11 @@
  * This class defines all code necessary to run during the plugin's deactivation.
  *
  * @since      1.0.0
- * @package    Settings_Page
- * @subpackage Settings_Page/includes
+ * @package    TCR_Calendar
+ * @subpackage TCR_Calendar/includes
  * @author     Ben Shadle <benshadle@gmail.com>
  */
-class Settings_Page_Deactivator {
+class TCR_Calendar_Deactivator {
 
 	/**
 	 * Short Description. (use period)

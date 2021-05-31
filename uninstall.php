@@ -22,7 +22,7 @@
  * @link       https://www.wplauncher.com
  * @since      1.0.0
  *
- * @package    Settings_Page
+ * @package    TCR_Calendar
  */
 
 // If uninstall not called from WordPress, then exit.

@@ -9,8 +9,8 @@
  * @link       https://www.wplauncher.com
  * @since      1.0.0
  *
- * @package    Settings_Page
- * @subpackage Settings_Page/includes
+ * @package    TCR_Calendar
+ * @subpackage TCR_Calendar/includes
  */
 
 /**
@@ -23,11 +23,11 @@
  * version of the plugin.
  *
  * @since      1.0.0
- * @package    Settings_Page
- * @subpackage Settings_Page/includes
+ * @package    TCR_Calendar
+ * @subpackage TCR_Calendar/includes
  * @author     Ben Shadle <benshadle@gmail.com>
  */
-class Settings_Page {
+class TCR_Calendar {
 
 	/**
 	 * The loader that's responsible for maintaining and registering all hooks that power
@@ -35,7 +35,7 @@ class Settings_Page {
 	 *
 	 * @since    1.0.0
 	 * @access   protected
-	 * @var      Settings_Page_Loader    $loader    Maintains and registers all hooks for the plugin.
+	 * @var      TCR_Calendar_Loader    $loader    Maintains and registers all hooks for the plugin.
 	 */
 	protected $loader;
 
@@ -67,12 +67,12 @@ class Settings_Page {
 	 * @since    1.0.0
 	 */
 	public function __construct() {
-		if ( defined( 'SETTINGS_PAGE_VERSION' ) ) {
-			$this->version = SETTINGS_PAGE_VERSION;
+		if ( defined( 'TCR_Calendar_VERSION' ) ) {
+			$this->version = TCR_Calendar_VERSION;
 		} else {
 			$this->version = '1.0.0';
 		}
-		$this->plugin_name = 'settings-page';
+		$this->plugin_name = 'tcr-calendar';
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -86,10 +86,10 @@ class Settings_Page {
 	 *
 	 * Include the following files that make up the plugin:
 	 *
-	 * - Settings_Page_Loader. Orchestrates the hooks of the plugin.
-	 * - Settings_Page_i18n. Defines internationalization functionality.
-	 * - Settings_Page_Admin. Defines all hooks for the admin area.
-	 * - Settings_Page_Public. Defines all hooks for the public side of the site.
+	 * - TCR_Calendar_Loader. Orchestrates the hooks of the plugin.
+	 * - TCR_Calendar_i18n. Defines internationalization functionality.
+	 * - TCR_Calendar_Admin. Defines all hooks for the admin area.
+	 * - TCR_Calendar_Public. Defines all hooks for the public side of the site.
 	 *
 	 * Create an instance of the loader which will be used to register the hooks
 	 * with WordPress.
@@ -103,33 +103,33 @@ class Settings_Page {
 		 * The class responsible for orchestrating the actions and filters of the
 		 * core plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-settings-page-loader.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-tcr-calendar-loader.php';
 
 		/**
 		 * The class responsible for defining internationalization functionality
 		 * of the plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-settings-page-i18n.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-tcr-calendar-i18n.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-settings-page-admin.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-tcr-calendar-admin.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the public-facing
 		 * side of the site.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-settings-page-public.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-tcr-calendar-public.php';
 
-		$this->loader = new Settings_Page_Loader();
+		$this->loader = new TCR_Calendar_Loader();
 
 	}
 
 	/**
 	 * Define the locale for this plugin for internationalization.
 	 *
-	 * Uses the Settings_Page_i18n class in order to set the domain and to register the hook
+	 * Uses the TCR_Calendar_i18n class in order to set the domain and to register the hook
 	 * with WordPress.
 	 *
 	 * @since    1.0.0
@@ -137,7 +137,7 @@ class Settings_Page {
 	 */
 	private function set_locale() {
 
-		$plugin_i18n = new Settings_Page_i18n();
+		$plugin_i18n = new TCR_Calendar_i18n();
 
 		$this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
 
@@ -152,7 +152,7 @@ class Settings_Page {
 	 */
 	private function define_admin_hooks() {
 
-		$plugin_admin = new Settings_Page_Admin( $this->get_plugin_name(), $this->get_version() );
+		$plugin_admin = new TCR_Calendar_Admin( $this->get_plugin_name(), $this->get_version() );
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
@@ -168,7 +168,7 @@ class Settings_Page {
 	 */
 	private function define_public_hooks() {
 
-		$plugin_public = new Settings_Page_Public( $this->get_plugin_name(), $this->get_version() );
+		$plugin_public = new TCR_Calendar_Public( $this->get_plugin_name(), $this->get_version() );
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
@@ -199,7 +199,7 @@ class Settings_Page {
 	 * The reference to the class that orchestrates the hooks with the plugin.
 	 *
 	 * @since     1.0.0
-	 * @return    Settings_Page_Loader    Orchestrates the hooks of the plugin.
+	 * @return    TCR_Calendar_Loader    Orchestrates the hooks of the plugin.
 	 */
 	public function get_loader() {
 		return $this->loader;

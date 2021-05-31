@@ -9,8 +9,8 @@
  * @link       https://www.wplauncher.com
  * @since      1.0.0
  *
- * @package    Settings_Page
- * @subpackage Settings_Page/includes
+ * @package    TCR_Calendar
+ * @subpackage TCR_Calendar/includes
  */
 
 /**
@@ -20,11 +20,11 @@
  * so that it is ready for translation.
  *
  * @since      1.0.0
- * @package    Settings_Page
- * @subpackage Settings_Page/includes
+ * @package    TCR_Calendar
+ * @subpackage TCR_Calendar/includes
  * @author     Ben Shadle <benshadle@gmail.com>
  */
-class Settings_Page_i18n {
+class TCR_Calendar_i18n {
 
 
 	/**
@@ -35,7 +35,7 @@ class Settings_Page_i18n {
 	public function load_plugin_textdomain() {
 
 		load_plugin_textdomain(
-			'settings-page',
+			'tcr-calendar',
 			false,
 			dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages/'
 		);

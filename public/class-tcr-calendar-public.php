@@ -6,8 +6,8 @@
  * @link       https://www.wplauncher.com
  * @since      1.0.0
  *
- * @package    Settings_Page
- * @subpackage Settings_Page/public
+ * @package    TCR_Calendar
+ * @subpackage TCR_Calendar/public
  */
 
 /**
@@ -16,11 +16,11 @@
  * Defines the plugin name, version, and two examples hooks for how to
  * enqueue the public-facing stylesheet and JavaScript.
  *
- * @package    Settings_Page
- * @subpackage Settings_Page/public
+ * @package    TCR_Calendar
+ * @subpackage TCR_Calendar/public
  * @author     Ben Shadle <benshadle@gmail.com>
  */
-class Settings_Page_Public {
+class TCR_Calendar_Public {
 
 	/**
 	 * The ID of this plugin.
@@ -65,15 +65,15 @@ class Settings_Page_Public {
 		 * This function is provided for demonstration purposes only.
 		 *
 		 * An instance of this class should be passed to the run() function
-		 * defined in Settings_Page_Loader as all of the hooks are defined
+		 * defined in TCR_Calendar_Loader as all of the hooks are defined
 		 * in that particular class.
 		 *
-		 * The Settings_Page_Loader will then create the relationship
+		 * The TCR_Calendar_Loader will then create the relationship
 		 * between the defined hooks and the functions defined in this
 		 * class.
 		 */
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/settings-page-public.css', array(), $this->version, 'all' );
+		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/tcr-calendar-public.css', array(), $this->version, 'all' );
 
 	}
 
@@ -88,15 +88,15 @@ class Settings_Page_Public {
 		 * This function is provided for demonstration purposes only.
 		 *
 		 * An instance of this class should be passed to the run() function
-		 * defined in Settings_Page_Loader as all of the hooks are defined
+		 * defined in TCR_Calendar_Loader as all of the hooks are defined
 		 * in that particular class.
 		 *
-		 * The Settings_Page_Loader will then create the relationship
+		 * The TCR_Calendar_Loader will then create the relationship
 		 * between the defined hooks and the functions defined in this
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/settings-page-public.js', array( 'jquery' ), $this->version, false );
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/tcr-calendar-public.js', array( 'jquery' ), $this->version, false );
 
 	}
 

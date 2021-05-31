@@ -8,8 +8,8 @@
  * @link       https://www.wplauncher.com
  * @since      1.0.0
  *
- * @package    Settings_Page
- * @subpackage Settings_Page/admin/partials
+ * @package    TCR_Calendar
+ * @subpackage TCR_Calendar/admin/partials
  */
 ?>
 

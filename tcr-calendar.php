@@ -8,20 +8,20 @@
  * registers the activation and deactivation functions, and defines a function
  * that starts the plugin.
  *
- * @link              https://www.wplauncher.com
+ * @link              https://www.buildmood.com
  * @since             1.0.0
- * @package           Settings_Page
+ * @package           TCR_Calendar
  *
  * @wordpress-plugin
- * Plugin Name:       Settings Page
+ * Plugin Name:       TX CEO Ranch Calendar
  * Plugin URI:        https://www.wplauncher.com
- * Description:       This is a short description of what the plugin does. It's displayed in the WordPress admin area.
+ * Description:       Plugin that gives ability to manually or automatically sync calendars. Currently supports Google Calendar.
  * Version:           1.0.0
- * Author:            Ben Shadle
- * Author URI:        https://www.wplauncher.com
+ * Author:            BuildMood
+ * Author URI:        https://www.buildmood.com
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
- * Text Domain:       settings-page
+ * Text Domain:       tcr-calendar
  * Domain Path:       /languages
  */
 
@@ -35,34 +35,34 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'SETTINGS_PAGE_VERSION', '1.0.0' );
+define( 'TCR_Calendar_VERSION', '1.0.0' );
 
 /**
  * The code that runs during plugin activation.
- * This action is documented in includes/class-settings-page-activator.php
+ * This action is documented in includes/class-tcr-calendar-activator.php
  */
-function activate_settings_page() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-settings-page-activator.php';
-	Settings_Page_Activator::activate();
+function activate_tcr_calendar() {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-tcr-calendar-activator.php';
+	TCR_Calendar_Activator::activate();
 }
 
 /**
  * The code that runs during plugin deactivation.
- * This action is documented in includes/class-settings-page-deactivator.php
+ * This action is documented in includes/class-tcr-calendar-deactivator.php
  */
-function deactivate_settings_page() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-settings-page-deactivator.php';
-	Settings_Page_Deactivator::deactivate();
+function deactivate_tcr_calendar() {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-tcr-calendar-deactivator.php';
+	TCR_Calendar_Deactivator::deactivate();
 }
 
-register_activation_hook( __FILE__, 'activate_settings_page' );
-register_deactivation_hook( __FILE__, 'deactivate_settings_page' );
+register_activation_hook( __FILE__, 'activate_tcr_calendar' );
+register_deactivation_hook( __FILE__, 'deactivate_tcr_calendar' );
 
 /**
  * The core plugin class that is used to define internationalization,
  * admin-specific hooks, and public-facing site hooks.
  */
-require plugin_dir_path( __FILE__ ) . 'includes/class-settings-page.php';
+require plugin_dir_path( __FILE__ ) . 'includes/class-tcr-calendar.php';
 
 /**
  * Begins execution of the plugin.
@@ -73,10 +73,10 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-settings-page.php';
  *
  * @since    1.0.0
  */
-function run_settings_page() {
+function run_tcr_calendar() {
 
-	$plugin = new Settings_Page();
+	$plugin = new TCR_Calendar();
 	$plugin->run();
 
 }
-run_settings_page();
+run_tcr_calendar();
