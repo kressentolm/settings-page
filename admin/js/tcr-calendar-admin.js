@@ -1,4 +1,4 @@
-(function( $ ) {
+(function ($) {
 	'use strict';
 
 	/**
@@ -29,4 +29,40 @@
 	 * practising this, we should strive to set a better example in our own work.
 	 */
 
-})( jQuery );
+	//  var form_data = $( this ).serializeArray();
+
+	// Here we add our nonce (The one we created on our functions.php. WordPress needs this code to verify if the request comes from a valid source.
+
+	// $(function () {
+
+	// 	// Here is the ajax petition.
+	// 	$('#getCalendarData').on('click', function (e) {
+	// 		e.preventDefault();
+
+	// 		// var form = $('#calendarForm').serialize();
+
+	// 		$.ajax({
+	// 			type: "POST",
+	// 			url: scriptData.ajaxurl,
+	// 			data: {
+	// 				action: 'calendarCall'
+	// 			},
+	// 			success: function (data) {
+	// 				console.log('Submission was successful. Try to make simple call here to https://jsonplaceholder.typicode.com/todos/1');
+	// 				console.log(data);
+	// 				console.log(window.location.href);
+	// 				//window.location.href = '?page_id=7=' + data;
+	// 			},
+	// 			error: function (data) {
+	// 				console.log('An error occurred.');
+	// 				console.log(data);
+	// 			},
+	// 		});
+	// 	});
+
+	// 	// This return prevents the submit event to refresh the page.
+	// 	return false;
+
+	// });
+
+})(jQuery);

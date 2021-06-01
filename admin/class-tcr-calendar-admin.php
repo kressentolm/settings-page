@@ -97,7 +97,47 @@ class TCR_Calendar_Admin {
 		 */
 
 		wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/tcr-calendar-admin.js', array('jquery'), $this->version, false);
+
+		wp_register_script('ajax-calendar-script', plugin_dir_url(__FILE__) . 'js/ajax-calendar-script.js', array('jquery'));
+		wp_enqueue_script('ajax-calendar-script');
+		wp_localize_script('ajax-calendar-script', 
+			'ajax_calendar_object', 
+			array(
+				'ajaxurl' => admin_url('admin-ajax.php'), 
+				'nonce' => wp_create_nonce('ajax-nonce'),
+				'redirecturl' => admin_url('admin.php?page=tcr-calendar'), 
+				'loadingmessage' => __('Getting calendar data, please wait...'))
+			);
 	}
+
+	// calendar_call
+	public function calendar_call() {
+
+		// TODO: Make requests HERE to google calendar. We have it working and wired up now! ALSO, code cleanup.
+		if (empty($_POST['data'])) {
+			wp_die('Missing data');
+		}
+	
+		// $post_data = wp_unslash($_POST['data']);
+		// $post_data['command'] = wp_unslash($_POST['command']);
+		// $post_data['request_token_id'] = wp_unslash($_POST['request_token_id']);
+	
+		$api_url = 'https://jsonplaceholder.typicode.com/todos/1';
+		$response = wp_remote_get($api_url, array(
+			// Set the Content-Type header.
+			'headers' => array(
+				'Content-Type' => 'application/json',
+			),
+			// Set the request payload/body.
+			// 'body'    => json_encode($post_data),
+		));
+	
+		$res_body = wp_remote_retrieve_body($response);
+		echo $res_body;
+	
+		wp_die();
+	}
+
 	public function addPluginAdminMenu() {
 		//add_menu_page( $page_title, $menu_title, $capability, $menu_slug, $function, $icon_url, $position );
 		add_menu_page($this->plugin_name, 'TCR Calendar', 'administrator', $this->plugin_name, array($this, 'displayPluginAdminDashboard'), 'dashicons-schedule', 26);

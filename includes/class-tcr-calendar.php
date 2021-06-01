@@ -157,6 +157,7 @@ class TCR_Calendar {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
+		$this->loader->add_action(  'wp_ajax_calendar_call', $plugin_admin, 'calendar_call' );
 	}
 
 	/**
@@ -172,6 +173,10 @@ class TCR_Calendar {
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+
+		// $script_handle = 'get-api-calendar-events';
+		// $this->loader->add_action(  'wp_ajax_' . $script_handle, $plugin_public, 'get_data_from_calendar_api' );
+		// $this->loader->add_action(  'wp_ajax_nopriv_' . $script_handle, $plugin_public, 'get_data_from_calendar_api' );
 
 	}
 
