@@ -41,6 +41,11 @@ class TCR_Calendar_Admin {
 	private $version;
 
 	/**
+	 * Google API client
+	 */
+	private $gclient;
+
+	/**
 	 * Initialize the class and set its properties.
 	 *
 	 * @since    1.0.0
@@ -53,6 +58,27 @@ class TCR_Calendar_Admin {
 		$this->version = $version;
 		add_action('admin_menu', array($this, 'addPluginAdminMenu'), 9);
 		add_action('admin_init', array($this, 'registerAndBuildFields'));
+		add_action('admin_init', array($this, 'getGoogleClient'));
+	}
+
+	public function getGoogleClient() {
+
+		// Google Calendar OAuth API client setup
+		try {
+
+			// great, no exceptions where thrown while creating the object
+			$this->gclient = new Google_Client();
+			$this->gclient->setAuthConfig(plugin_dir_path(__DIR__) . '/includes/tx-ceo-test-calendar-a64897f369c6.json');
+			$this->gclient->setScopes(
+				"https://www.googleapis.com/auth/calendar.events.readonly"
+			);
+			$redirect_uri = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'];
+			$this->gclient->setRedirectUri($redirect_uri);
+
+			return $this->gclient;
+		} catch (\Exception $ex) {
+			echo $ex->getMessage();
+		}
 	}
 
 	/**
@@ -100,43 +126,71 @@ class TCR_Calendar_Admin {
 
 		wp_register_script('ajax-calendar-script', plugin_dir_url(__FILE__) . 'js/ajax-calendar-script.js', array('jquery'));
 		wp_enqueue_script('ajax-calendar-script');
-		wp_localize_script('ajax-calendar-script', 
-			'ajax_calendar_object', 
+		wp_localize_script(
+			'ajax-calendar-script',
+			'ajax_calendar_object',
 			array(
-				'ajaxurl' => admin_url('admin-ajax.php'), 
+				'ajaxurl' => admin_url('admin-ajax.php'),
 				'nonce' => wp_create_nonce('ajax-nonce'),
-				'redirecturl' => admin_url('admin.php?page=tcr-calendar'), 
-				'loadingmessage' => __('Getting calendar data, please wait...'))
-			);
+				'redirecturl' => admin_url('admin.php?page=tcr-calendar'),
+				'loadingmessage' => __('Getting calendar data, please wait...')
+			)
+		);
 	}
 
 	// calendar_call
 	public function calendar_call() {
 
-		// TODO: Make requests HERE to google calendar. We have it working and wired up now! ALSO, code cleanup.
-		if (empty($_POST['data'])) {
-			wp_die('Missing data');
+		$events_array = [];
+
+		// Bail early if AJAX post call not called in order to get here (or is empty for some reason)
+		// echo json_encode($_REQUEST);
+		if (!wp_verify_nonce($_REQUEST['nonce'], "ajax-nonce")) {
+			exit("No naughty business please");
 		}
-	
-		// $post_data = wp_unslash($_POST['data']);
-		// $post_data['command'] = wp_unslash($_POST['command']);
-		// $post_data['request_token_id'] = wp_unslash($_POST['request_token_id']);
-	
-		$api_url = 'https://jsonplaceholder.typicode.com/todos/1';
-		$response = wp_remote_get($api_url, array(
-			// Set the Content-Type header.
-			'headers' => array(
-				'Content-Type' => 'application/json',
-			),
-			// Set the request payload/body.
-			// 'body'    => json_encode($post_data),
-		));
-	
-		$res_body = wp_remote_retrieve_body($response);
-		echo $res_body;
-	
+
+		try {
+
+			$client = $this->getGoogleClient();
+			$calendarService = new Google_Service_Calendar($client);
+
+			// Testing with upcoming USA holidays
+			$myCalendarID = "bjcv5ehrum2jc72t2b1h24gms8@group.calendar.google.com";
+
+			$events = $calendarService->events
+			->listEvents($myCalendarID, array(
+					'timeMax' => date(DATE_RFC3339),
+					'maxResults' => 4
+				)
+			)->getItems();
+
+			// $events = $calendarService->events->listEvents($myCalendarID)->getItems();
+
+			foreach ($events as $event) {
+				$events_array[] = array(
+					'id' => $event->getId(),
+					'title' => $event->getSummary(),
+					'start' => $event->getStart()->dateTime,
+					'end' => $event->getEnd()->dateTime
+				);
+			}
+
+			// Need to see where we will be saving this!
+			// echo json_encode(get_post_types());
+
+			// TODO: Add events to a custom post type, or update existing events (can track by ID)
+
+			echo json_encode($events_array);
+		} catch (\Exception $ex) {
+			echo $ex->getMessage();
+		}
+
+		// AJAX cleanup
 		wp_die();
 	}
+
+	// Display calendar
+
 
 	public function addPluginAdminMenu() {
 		//add_menu_page( $page_title, $menu_title, $capability, $menu_slug, $function, $icon_url, $position );

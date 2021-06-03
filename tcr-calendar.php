@@ -30,6 +30,8 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
+require __DIR__ . '/vendor/autoload.php';
+
 /**
  * Currently plugin version.
  * Start at version 1.0.0 and use SemVer - https://semver.org
@@ -63,6 +65,9 @@ register_deactivation_hook( __FILE__, 'deactivate_tcr_calendar' );
  * admin-specific hooks, and public-facing site hooks.
  */
 require plugin_dir_path( __FILE__ ) . 'includes/class-tcr-calendar.php';
+
+// So we can use the calendar anywhere in the plugin (and extend it to the front-end)
+require plugin_dir_path( __FILE__ ) . 'admin/TCR_Calendar_Display.php';
 
 /**
  * Begins execution of the plugin.

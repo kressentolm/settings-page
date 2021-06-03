@@ -1,5 +1,7 @@
 <?php
 
+// include( plugin_dir_path( __FILE__ ) . 'admin/TCR_Calendar_Display.php');
+
 /**
  * Provide a admin area view for the plugin
  *
@@ -13,27 +15,14 @@
  */
 ?>
 
-<?php
-// Here we register our "send_form" function to handle our AJAX request, do you remember the "superhypermega" hidden field? Yes, this is what it refers, the "send_form" action.
-// add_action('wp_ajax_send_form', 'send_form'); // This is for authenticated users
-// add_action('wp_ajax_nopriv_send_form', 'send_form'); // This is for unauthenticated users.
-
-?>
-
 <!-- <input type="button" value="Sync Calendar" class="button primary-button" id="getCalendarData" class="button primary-button" /> -->
 <form action="<?php echo admin_url('admin-ajax.php'); ?>" id="calendarForm">
+    <h2>Syncing your Calendar</h2>
+    <p>Click the button below in order to sync with your Google Calendar. If you need to update the calendar to sync with, you can update your settings.</p>
     <input type="hidden" name="action" value="calendar_call" />
-    <input type="submit" value="Sync Calendar" class="primary" name="submit" id="submit" class="button button-primary" />
+    <!-- <input type="hidden" name="tcr_get_calendar_meta_nonce_form_nonce" value="<?php echo $tcr_get_calendar_meta_nonce; ?>" /> -->
+    <input type="submit" value="Sync Calendar" name="submit" id="submit" class="button button-primary button-large" />
 </form>
-<div class="result_area"></div>
-<!-- <script>
-    jQuery("#getCalendarData").click(function() {
-        jQuery.post(ajaxurl, {
-                'action': 'calendar_call'
-            },
-            function(msg) {
-                jQuery(".result_area").html(msg);
-            });
-    });
-</script> -->
-<?php
+<!-- <div class="result_area"></div> -->
+<pre class="result_area" style="white-space: pre-wrap;"></pre>
+<?php 

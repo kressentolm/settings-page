@@ -56,13 +56,22 @@
 
             $.ajax({
                 type: "post",
-                url: ajaxurl + "?action=calendar_call",
+                url: ajaxurl + "?action=calendar_call&nonce=" + nonce,
+                url: ajaxurl,
                 loadingMessage: loadingMessage,
-                data: $('#calendarForm').serialize() + '&action=calendar_call',
-                processData: false,
-                success: function (data) {
+                // data: $('#calendarForm').serialize() + '?action=calendar_call&nonce=' + nonce,
+                data: {
+                    action: 'calendar_call',
+                    nonce: ajax_calendar_object.nonce
+                },
+                // processData: false,
+                success: function (response, data) {
                     console.log('Submission was successful. Try to make simple call here to https://jsonplaceholder.typicode.com/todos/1');
                     console.log(data);
+                    console.log(response);
+                    $('.result_area').html(response);
+                    let json_data = JSON.parse(response);
+                    console.log({json_data});
                     // console.log(window.location.href);
                     // window.location.href = redirecturl;
                 },
