@@ -36,9 +36,6 @@
     
     $(function () {
 
-        console.log(ajax_calendar_object);
-
-        // var ajaxurl = ajax_calendar_object.ajaxurl;
         console.log(ajaxurl);
         var loadingMessage = ajax_calendar_object.loadingmessage;
         var nonce = ajax_calendar_object.nonce;
@@ -53,21 +50,16 @@
                     type: "post",
                     url: ajaxurl + "?action=calendar_call&nonce=" + nonce,
                     loadingMessage: loadingMessage,
-                    // data: $('#calendarForm').serialize() + '?action=calendar_call&nonce=' + nonce,
                     data: {
                         action: 'calendar_call',
                         nonce: ajax_calendar_object.nonce
                     },
                     // processData: false,
                     success: function (response, data) {
-                        console.log('Submission was successful. Try to make simple call here to https://jsonplaceholder.typicode.com/todos/1');
-                        console.log(data);
-                        console.log(response);
-                        console.log(typeof response);
                         let json_data = JSON.parse(response);
                         if (json_data) {
-                            console.log(json_data);
-                            loader.html("<strong>Successfully grabbed " + json_data.length + " new events from Google Calendar</strong>");
+                            loader.html("<strong>Successfully created " + json_data.posts_inserted + " new events " +
+                            "and updated " + json_data.posts_updated + " events from Google Calendar</strong>");
                         }
                     },
                     error: function(xhr, status, error) {

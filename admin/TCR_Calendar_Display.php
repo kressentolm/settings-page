@@ -177,10 +177,28 @@ class TCR_Calendar_Display {
         // 3. Add option to turn off names (should always be off, but they may change their mind in the future)
         // 4. Update styling and put into its own CSS file, if we need to.
         // 5. Hook into calendar inside theme that consumes it.
-        $calendar = new TCR_Calendar_Display('2021-06-01');
-        $calendar->add_event('Birthday', '2021-06-03', 1, 'green');
-        $calendar->add_event('Doctors', '2021-06-04', 1, 'red');
-        $calendar->add_event('Holiday', '2021-06-16', 7);
+        // $todays_date = date("Y/m/d");
+        $todays_date = date("Y/m/d", strtotime("15 January 2021"));
+        $calendar = new TCR_Calendar_Display($todays_date);
+
+        // TODO: Update to only get range for the month
+        // TODO: Add ability to look at next and previous month
+        $events_list = get_posts(array(
+            'post_type' => 'tcr_event',
+            'numberposts' => -1
+        ));
+
+        // Cycle through events to create calendar, based on current Month view
+        foreach ($events_list as $item) {
+
+            $start = get_post_meta($item->ID, 'tcr_event_start', true);
+            $end = get_post_meta($item->ID, 'tcr_event_end', true);
+            $start_date = new DateTime(date('y-m-d', strtotime($start)));
+            $end_date = new DateTime(date('y-m-d', strtotime($end)));
+            $difference = $start_date->diff($end_date);
+
+            $calendar->add_event($item->post_title, $start, $difference->d + 1, 'red');
+        }
         return $calendar;
     }
 }

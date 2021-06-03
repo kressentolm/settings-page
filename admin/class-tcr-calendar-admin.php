@@ -59,6 +59,8 @@ class TCR_Calendar_Admin {
 		add_action('admin_menu', array($this, 'addPluginAdminMenu'), 9);
 		add_action('admin_init', array($this, 'registerAndBuildFields'));
 		add_action('admin_init', array($this, 'getGoogleClient'));
+		add_filter('manage_tcr_event_posts_columns', array($this, 'add_admin_columns'));
+		add_action('manage_tcr_event_posts_custom_column', array($this, 'update_admin_columns'), 10, 2);
 	}
 
 	public function getGoogleClient() {
@@ -125,7 +127,7 @@ class TCR_Calendar_Admin {
 		 */
 
 		wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/tcr-calendar-admin.js', array('jquery'), $this->version, false);
-		
+
 		// AJAX scripts
 		wp_register_script('ajax-calendar-script', plugin_dir_url(__FILE__) . 'js/ajax-calendar-script.js', array('jquery'));
 		wp_enqueue_script('ajax-calendar-script');
@@ -137,9 +139,9 @@ class TCR_Calendar_Admin {
 				'nonce' => wp_create_nonce('ajax-nonce'),
 				'redirecturl' => admin_url('admin.php?page=tcr-calendar'),
 				'loadingmessage' => __('Getting calendar data, please wait...')
-				)
-			);
-			
+			)
+		);
+
 		// Pace.js
 		// TODO: Add progress bar using Pace.js - script file
 		// wp_enqueue_script($this->plugin_name . '-pace-script', "https://cdn.jsdelivr.net/npm/pace-js@latest/pace.min.js", array('jquery'));
@@ -187,7 +189,6 @@ class TCR_Calendar_Admin {
 		$opts['labels']['view_item'] = esc_html__("View {$single}", 'wisdom');
 
 		register_post_type(strtolower($cpt_name), $opts);
-
 	}
 
 	public function move_post_types($parent_file) {
@@ -200,6 +201,24 @@ class TCR_Calendar_Admin {
 		}
 		return $parent_file;
 	}
+
+	public function add_admin_columns($columns) {
+		$columns['start'] = __( 'Start Date', 'tcr' );
+		$columns['end'] = __( 'End Date', 'tcr' );
+		return $columns;
+	}
+
+	function update_admin_columns( $column, $post_id ) {
+		// Image column
+		if ( 'start' === $column ) {
+			$start = get_post_meta($post_id, 'tcr_event_start', true);
+			echo get_date_from_gmt($start, "m/d/Y");
+		}
+		if ( 'end' === $column ) {
+			$end = get_post_meta($post_id, 'tcr_event_end', true);
+			echo get_date_from_gmt($end, "m/d/Y");
+		}
+	  }
 
 	// calendar_call
 	public function calendar_call() {
@@ -217,9 +236,18 @@ class TCR_Calendar_Admin {
 			$client = $this->getGoogleClient();
 			$calendarService = new Google_Service_Calendar($client);
 
-			// Testing with upcoming USA holidays
+			// Take events array and create or update 'tcr_event' post type with posts
+
+			// 1. Find all events that do not currently exist in DB and create them
+			// -- Check by Id from Google Calendar
+
+			// 2. Update all events that do exist in DB
+			// -- Check by Id from Google Calendar
+			
+			// TODO: Add option in settings to put in custom calendar ID, then consume here
 			$myCalendarID = "bjcv5ehrum2jc72t2b1h24gms8@group.calendar.google.com";
 
+			$existing_event_ids = [];
 			$events = $calendarService->events
 				->listEvents(
 					$myCalendarID,
@@ -229,8 +257,6 @@ class TCR_Calendar_Admin {
 					)
 				)->getItems();
 
-			// $events = $calendarService->events->listEvents($myCalendarID)->getItems();
-
 			foreach ($events as $event) {
 				$events_array[] = array(
 					'id' => $event->getId(),
@@ -238,14 +264,83 @@ class TCR_Calendar_Admin {
 					'start' => $event->getStart()->dateTime,
 					'end' => $event->getEnd()->dateTime
 				);
+				$existing_event_ids[] = $event->getId();
 			}
 
-			// Need to see where we will be saving this!
-			// echo json_encode(get_post_types());
+			$existing_posts_ids = get_posts(array(
+				// 'fields' => 'ids', // Only get post IDs
+				'numberofposts' => -1,
+				'post_type' => 'tcr_event',
+				'fields' => 'ids',
+				'meta_query' =>
+				array(
+					'compare' => 'IN',
+					'key'   => 'tcr_gcal_id',
+					'value' => $existing_event_ids,
+				),
 
-			// TODO: Add events to a custom post type, or update existing events (can track by ID)
+			));
 
-			echo json_encode($events_array);
+			$existing_gcal_ids = [];
+
+			foreach($existing_posts_ids as $id) {
+				$existing_gcal_ids[] = get_post_meta($id, 'tcr_gcal_id', true);
+			}
+
+			$return_to_js_script = [];
+			$posts_inserted = [];
+			$posts_updated = [];
+
+			$return_to_js_script['existing_event_ids'] = $existing_event_ids;
+			$return_to_js_script['events_downloaded'] = $events_array;
+			$return_to_js_script['existing_posts_id'] = $existing_posts_ids;
+
+			foreach ($events_array as $ev) {
+				if (!in_array($ev->ID, $existing_gcal_ids)) {
+					// create new event with title, start, and end being postmeta
+					$new_post = wp_insert_post(array(
+						'post_title' => $ev['title'],
+						'post_type' => 'tcr_event',
+						'post_status' => 'publish',
+						'post_title' => $ev['title'],
+						'meta_input' => array(
+							'tcr_gcal_id' => $ev['ID'],
+							'tcr_event_start' => $ev['start'],
+							'tcr_event_end' => $ev['end']
+						)
+					));
+					$posts_inserted[] = $new_post;
+				} else {
+					$updateable_post_id = get_posts(array(
+						'numberofposts' => 1,
+						'post_type' => 'tcr_event',
+						'fields' => 'ids',
+						'meta_query' =>
+						array(
+							'key'   => 'tcr_gcal_id',
+							'value' => $ev->ID,
+						),
+		
+					));
+					// already exists, so just update
+					$updated_post = wp_update_post(array(
+						'ID' => $updateable_post_id,
+						'post_type' => 'tcr_event',
+						'post_title' => $ev['title'],
+						'meta_input' => array(
+							'tcr_gcal_id' => $ev['ID'],
+							'tcr_event_start' => $ev['start'],
+							'tcr_event_end' => $ev['end']
+						)
+					));
+					$posts_updated[] = $updated_post;
+				}
+			}
+
+			$return_to_js_script['posts_inserted'] = count($posts_inserted);
+			$return_to_js_script['posts_updated'] = count($posts_updated);
+
+			echo json_encode($return_to_js_script);
 		} catch (\Exception $ex) {
 			echo $ex->getMessage();
 		}
