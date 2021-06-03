@@ -88,3 +88,8 @@
 	border-color: #999;
 	color: #222;
 }
+
+#loader-area {
+	margin: 0 auto;
+	padding: 1em 0;
+}

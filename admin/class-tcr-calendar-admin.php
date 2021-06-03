@@ -101,6 +101,8 @@ class TCR_Calendar_Admin {
 		 */
 
 		wp_enqueue_style($this->plugin_name, plugin_dir_url(__FILE__) . 'css/tcr-calendar-admin.css', array(), $this->version, 'all');
+		// TODO: Add progress bar using Pace.js - styles
+		// wp_enqueue_style($this->plugin_name . '-pace-style', "https://cdn.jsdelivr.net/npm/pace-js@latest/pace-theme-default.min.css", array());
 	}
 
 	/**
@@ -123,7 +125,8 @@ class TCR_Calendar_Admin {
 		 */
 
 		wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/tcr-calendar-admin.js', array('jquery'), $this->version, false);
-
+		
+		// AJAX scripts
 		wp_register_script('ajax-calendar-script', plugin_dir_url(__FILE__) . 'js/ajax-calendar-script.js', array('jquery'));
 		wp_enqueue_script('ajax-calendar-script');
 		wp_localize_script(
@@ -134,8 +137,12 @@ class TCR_Calendar_Admin {
 				'nonce' => wp_create_nonce('ajax-nonce'),
 				'redirecturl' => admin_url('admin.php?page=tcr-calendar'),
 				'loadingmessage' => __('Getting calendar data, please wait...')
-			)
-		);
+				)
+			);
+			
+		// Pace.js
+		// TODO: Add progress bar using Pace.js - script file
+		// wp_enqueue_script($this->plugin_name . '-pace-script', "https://cdn.jsdelivr.net/npm/pace-js@latest/pace.min.js", array('jquery'));
 	}
 
 	public function create_post_types() {
