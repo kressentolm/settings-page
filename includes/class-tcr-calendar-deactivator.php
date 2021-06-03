@@ -30,7 +30,10 @@ class TCR_Calendar_Deactivator {
 	 * @since    1.0.0
 	 */
 	public static function deactivate() {
-
+		// remove custom post type
+		if (post_type_exists('tcr_events')) {
+			unregister_post_type('tcr_events');
+		}
 	}
 
 }

@@ -1,7 +1,5 @@
 <?php
 
-// include( plugin_dir_path( __FILE__ ) . 'admin/TCR_Calendar_Display.php');
-
 /**
  * Provide a admin area view for the plugin
  *
@@ -24,5 +22,6 @@
     <input type="submit" value="Sync Calendar" name="submit" id="submit" class="button button-primary button-large" />
 </form>
 <!-- <div class="result_area"></div> -->
-<pre class="result_area" style="white-space: pre-wrap;"></pre>
+<pre class="result_area" style="white-space: pre-wrap;">
+</pre>
 <?php 

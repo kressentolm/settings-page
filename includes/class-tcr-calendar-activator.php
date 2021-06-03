@@ -30,7 +30,31 @@ class TCR_Calendar_Activator {
 	 * @since    1.0.0
 	 */
 	public static function activate() {
-
+		// Create post type
+		if (!post_type_exists('tcr_events')) {
+			register_post_type('tcr_events', array(
+				'label' => 'TCR Events',
+				'public' => true,
+				'show_ui' => true,
+				'capability_type' => 'post',
+				'hierarchical' => false,
+				'rewrite' => array(
+					'slug' => 'tcr-events',
+					'with_front' => false
+				),
+				'query_var' => true,
+				'supports' => array(
+					'title',
+					'editor',
+					'excerpt',
+					'trackbacks',
+					'custom-fields',
+					'revisions',
+					'thumbnail',
+					'author',
+					'page-attributes'
+				)
+			));
+		}
 	}
-
 }
