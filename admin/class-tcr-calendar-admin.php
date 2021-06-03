@@ -181,10 +181,6 @@ class TCR_Calendar_Admin {
 
 		register_post_type(strtolower($cpt_name), $opts);
 
-		// add_action('admin_menu', function () {
-		// 	// Add "Example CPT" Custom-Post-Type as submenu of the "Example Parent Page" page
-		// 	add_submenu_page($this->plugin_name, 'Events', 'Events', 'edit_pages', 'edit.php?post_type=tcr_event');
-		// }, 10);
 	}
 
 	public function move_post_types($parent_file) {
@@ -250,9 +246,6 @@ class TCR_Calendar_Admin {
 		// AJAX cleanup
 		wp_die();
 	}
-
-	// Display calendar
-
 
 	public function addPluginAdminMenu() {
 		//add_menu_page( $page_title, $menu_title, $capability, $menu_slug, $function, $icon_url, $position );
