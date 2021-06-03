@@ -138,6 +138,66 @@ class TCR_Calendar_Admin {
 		);
 	}
 
+	public function create_post_types() {
+		$cap_type = 'post';
+		$plural = 'Events';
+		$single = 'Event';
+		$cpt_name = 'tcr_event';
+		$opts['can_export'] = TRUE;
+		$opts['capability_type'] = $cap_type;
+		$opts['description'] = '';
+		$opts['exclude_from_search'] = FALSE;
+		$opts['has_archive'] = FALSE;
+		$opts['hierarchical'] = FALSE;
+		$opts['map_meta_cap'] = TRUE;
+		$opts['menu_icon'] = 'dashicons-calendar-alt';
+		$opts['menu_position'] = 25;
+		$opts['public'] = TRUE;
+		$opts['publicly_querable'] = TRUE;
+		$opts['query_var'] = TRUE;
+		$opts['register_meta_box_cb'] = '';
+		$opts['rewrite'] = FALSE;
+		$opts['show_in_admin_bar'] = TRUE;
+		$opts['show_in_menu'] = FALSE;
+		$opts['show_in_nav_menu'] = FALSE;
+		$opts['capabilities'] = array(
+			'create_posts' => 'do_not_allow'
+		);
+
+		$opts['labels']['add_new'] = esc_html__("Add New {$single}", 'wisdom');
+		$opts['labels']['add_new_item'] = esc_html__("Add New {$single}", 'wisdom');
+		$opts['labels']['all_items'] = esc_html__($plural, 'wisdom');
+		$opts['labels']['edit_item'] = esc_html__("Edit {$single}", 'wisdom');
+		$opts['labels']['menu_name'] = esc_html__($plural, 'wisdom');
+		$opts['labels']['name'] = esc_html__($plural, 'wisdom');
+		$opts['labels']['name_admin_bar'] = esc_html__($single, 'wisdom');
+		$opts['labels']['new_item'] = esc_html__("New {$single}", 'wisdom');
+		$opts['labels']['not_found'] = esc_html__("No {$plural} Found", 'wisdom');
+		$opts['labels']['not_found_in_trash'] = esc_html__("No {$plural} Found in Trash", 'wisdom');
+		$opts['labels']['parent_item_colon'] = esc_html__("Parent {$plural} :", 'wisdom');
+		$opts['labels']['search_items'] = esc_html__("Search {$plural}", 'wisdom');
+		$opts['labels']['singular_name'] = esc_html__($single, 'wisdom');
+		$opts['labels']['view_item'] = esc_html__("View {$single}", 'wisdom');
+
+		register_post_type(strtolower($cpt_name), $opts);
+
+		// add_action('admin_menu', function () {
+		// 	// Add "Example CPT" Custom-Post-Type as submenu of the "Example Parent Page" page
+		// 	add_submenu_page($this->plugin_name, 'Events', 'Events', 'edit_pages', 'edit.php?post_type=tcr_event');
+		// }, 10);
+	}
+
+	public function move_post_types($parent_file) {
+		global $submenu_file, $current_screen;
+
+		// Set correct active/current menu and submenu in the WordPress Admin menu for the "example_cpt" Add-New/Edit/List
+		if ($current_screen->post_type == 'example_cpt') {
+			$submenu_file = 'edit.php?post_type=example_cpt';
+			$parent_file = 'example_parent_page_id';
+		}
+		return $parent_file;
+	}
+
 	// calendar_call
 	public function calendar_call() {
 
@@ -158,11 +218,13 @@ class TCR_Calendar_Admin {
 			$myCalendarID = "bjcv5ehrum2jc72t2b1h24gms8@group.calendar.google.com";
 
 			$events = $calendarService->events
-			->listEvents($myCalendarID, array(
-					'timeMax' => date(DATE_RFC3339),
-					'maxResults' => 4
-				)
-			)->getItems();
+				->listEvents(
+					$myCalendarID,
+					array(
+						'timeMax' => date(DATE_RFC3339),
+						'maxResults' => 4
+					)
+				)->getItems();
 
 			// $events = $calendarService->events->listEvents($myCalendarID)->getItems();
 
@@ -197,6 +259,8 @@ class TCR_Calendar_Admin {
 		add_menu_page($this->plugin_name, 'TCR Calendar', 'administrator', $this->plugin_name, array($this, 'displayPluginAdminDashboard'), 'dashicons-schedule', 26);
 
 		//add_submenu_page( '$parent_slug, $page_title, $menu_title, $capability, $menu_slug, $function );
+		add_submenu_page($this->plugin_name, 'Events', 'Events', 'edit_pages', 'edit.php?post_type=tcr_event');
+
 		add_submenu_page($this->plugin_name, 'TCR Calendar Settings', 'Settings', 'administrator', $this->plugin_name . '-settings', array($this, 'displayPluginAdminSettings'));
 	}
 	public function displayPluginAdminDashboard() {

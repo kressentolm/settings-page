@@ -155,7 +155,8 @@ class TCR_Calendar {
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
-
+		$this->loader->add_action(  'init', $plugin_admin, 'create_post_types' );
+		$this->loader->add_filter(  'parent_file', $plugin_admin, 'move_post_types' );
 		$this->loader->add_action(  'wp_ajax_calendar_call', $plugin_admin, 'calendar_call' );
 	}
 
