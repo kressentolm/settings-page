@@ -29,4 +29,32 @@
 	 * practising this, we should strive to set a better example in our own work.
 	 */
 
+	 function setCookie(key, value, expiry) {
+        var expires = new Date();
+        expires.setTime(expires.getTime() + (expiry * 24 * 60 * 60 * 1000));
+        document.cookie = key + '=' + value + ';expires=' + expires.toUTCString();
+    }
+
+    // function getCookie(key) {
+    //     var keyValue = document.cookie.match('(^|;) ?' + key + '=([^;]*)(;|$)');
+    //     return keyValue ? keyValue[2] : null;
+    // }
+
+    function eraseCookie(key) {
+        // Set cookie to empty value and previous date to force expiration
+		document.cookie = key + "= ; expires = Thu, 01 Jan 1970 00:00:00 GMT"
+    }
+
+	$(function() {
+		// Set cookies for WP to consume
+		$(".month-selector").on('click', function (e) {
+			e.stopImmediatePropagation();
+			eraseCookie('targetMonth');
+			var target = $(this).data('month-target');
+			setCookie('targetMonth', target, 1);
+			location.reload();
+		});
+		
+	});
+
 })( jQuery );

@@ -57,9 +57,14 @@
                     // processData: false,
                     success: function (response, data) {
                         let json_data = JSON.parse(response);
+                        console.log(json_data);
                         if (json_data) {
-                            loader.html("<strong>Successfully created " + json_data.posts_inserted + " new events " +
-                            "and updated " + json_data.posts_updated + " events from Google Calendar</strong>");
+                            if (json_data.posts_inserted > 0) {
+                                loader.html("<strong>Successfully created " + json_data.posts_inserted + " new events!</strong>"); 
+                            } else {
+                                loader.html("<strong>No new events were found, though some might have updated.</strong>"); 
+                            }
+                            // + "and updated " + json_data.posts_updated + " events from Google Calendar</strong>");
                         }
                     },
                     error: function(xhr, status, error) {

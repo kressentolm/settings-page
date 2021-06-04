@@ -3,16 +3,6 @@
 /**
  * The admin-specific functionality of the plugin.
  *
- * @link       https://www.wplauncher.com
- * @since      1.0.0
- *
- * @package    TCR_Calendar
- * @subpackage TCR_Calendar/admin
- */
-
-/**
- * The admin-specific functionality of the plugin.
- *
  * Defines the plugin name, version, and two examples hooks for how to
  * enqueue the admin-specific stylesheet and JavaScript.
  *
@@ -223,7 +213,7 @@ class TCR_Calendar_Admin {
 	// calendar_call
 	public function calendar_call() {
 
-		$events_array = [];
+		$incoming_events_array = [];
 
 		// Bail early if AJAX post call not called in order to get here (or is empty for some reason)
 		// echo json_encode($_REQUEST);
@@ -235,7 +225,8 @@ class TCR_Calendar_Admin {
 
 			$client = $this->getGoogleClient();
 			$calendarService = new Google_Service_Calendar($client);
-
+			$return_to_js_script = [];
+			
 			// Take events array and create or update 'tcr_event' post type with posts
 
 			// 1. Find all events that do not currently exist in DB and create them
@@ -252,17 +243,28 @@ class TCR_Calendar_Admin {
 				->listEvents(
 					$myCalendarID,
 					array(
-						'timeMax' => date(DATE_RFC3339),
-						'maxResults' => 4
+						'timeMin' => date(DATE_RFC3339), // Get all future events
 					)
 				)->getItems();
 
+			$return_to_js_script['incoming_events_full'] = $events; 
+
 			foreach ($events as $event) {
-				$events_array[] = array(
+				// If range of dates, comes through as `date` instead of `dateTime` from Google
+				// 2021-07-08T19:30:00-05:00
+				$start_date = isset($event->getStart()->dateTime) ?
+					gmdate('y-m-d', strtotime($event->getStart()->dateTime)) : 
+					gmdate('y-m-d', strtotime($event->getStart()->date)); 
+					
+				$end_date = isset($event->getEnd()->dateTime) ?  
+					gmdate('y-m-d', strtotime($event->getEnd()->dateTime)) : 
+					gmdate('y-m-d', strtotime($event->getEnd()->date)); 
+				
+					$incoming_events_array[] = array(
 					'id' => $event->getId(),
 					'title' => $event->getSummary(),
-					'start' => $event->getStart()->dateTime,
-					'end' => $event->getEnd()->dateTime
+					'start' => $start_date,
+					'end' => $end_date
 				);
 				$existing_event_ids[] = $event->getId();
 			}
@@ -272,31 +274,26 @@ class TCR_Calendar_Admin {
 				'numberofposts' => -1,
 				'post_type' => 'tcr_event',
 				'fields' => 'ids',
-				'meta_query' =>
-				array(
-					'compare' => 'IN',
-					'key'   => 'tcr_gcal_id',
-					'value' => $existing_event_ids,
-				),
-
 			));
 
 			$existing_gcal_ids = [];
 
 			foreach($existing_posts_ids as $id) {
-				$existing_gcal_ids[] = get_post_meta($id, 'tcr_gcal_id', true);
+				$gcal_id = get_post_meta($id, 'tcr_gcal_id', true);
+				if ($gcal_id) {
+					$existing_gcal_ids[] = $gcal_id;
+				}
 			}
-
-			$return_to_js_script = [];
+			
 			$posts_inserted = [];
 			$posts_updated = [];
-
-			$return_to_js_script['existing_event_ids'] = $existing_event_ids;
-			$return_to_js_script['events_downloaded'] = $events_array;
+			
+			$return_to_js_script['existing_gcal_ids'] = $existing_gcal_ids;
+			$return_to_js_script['incoming_events_array'] = $incoming_events_array;
 			$return_to_js_script['existing_posts_id'] = $existing_posts_ids;
 
-			foreach ($events_array as $ev) {
-				if (!in_array($ev->ID, $existing_gcal_ids)) {
+			foreach ($incoming_events_array as $ev) {
+				if (!in_array($ev['id'], $existing_gcal_ids)) {
 					// create new event with title, start, and end being postmeta
 					$new_post = wp_insert_post(array(
 						'post_title' => $ev['title'],
@@ -304,7 +301,7 @@ class TCR_Calendar_Admin {
 						'post_status' => 'publish',
 						'post_title' => $ev['title'],
 						'meta_input' => array(
-							'tcr_gcal_id' => $ev['ID'],
+							'tcr_gcal_id' => $ev['id'],
 							'tcr_event_start' => $ev['start'],
 							'tcr_event_end' => $ev['end']
 						)
@@ -318,22 +315,37 @@ class TCR_Calendar_Admin {
 						'meta_query' =>
 						array(
 							'key'   => 'tcr_gcal_id',
-							'value' => $ev->ID,
+							'value' => $ev['id'],
 						),
 		
 					));
-					// already exists, so just update
-					$updated_post = wp_update_post(array(
-						'ID' => $updateable_post_id,
-						'post_type' => 'tcr_event',
-						'post_title' => $ev['title'],
-						'meta_input' => array(
-							'tcr_gcal_id' => $ev['ID'],
-							'tcr_event_start' => $ev['start'],
-							'tcr_event_end' => $ev['end']
-						)
-					));
-					$posts_updated[] = $updated_post;
+
+					$existing_start = get_post_meta($updateable_post_id, 'tcr_event_start', true);
+					$existing_end = get_post_meta($updateable_post_id, 'tcr_event_end', true);
+					$existing_gcal_id = get_post_meta($updateable_post_id, 'tcr_gcal_id', true);
+
+					// Check if post meta has changed
+					// TODO: Find good way to compare dates. Will be more performant if not having to update every post
+					if (
+						$existing_start !== $ev['start'] ||
+						$existing_end !== $ev['end'] ||
+						$existing_gcal_id !== $ev['id']
+					) {
+
+						// already exists, so just update
+						$updated_post = wp_update_post(array(
+							'ID' => $updateable_post_id,
+							'post_type' => 'tcr_event',
+							'post_title' => $ev['title'],
+							'meta_input' => array(
+								'tcr_gcal_id' => $ev['id'],
+								'tcr_event_start' => $ev['start'],
+								'tcr_event_end' => $ev['end']
+							)
+						));
+						$posts_updated[] = $updated_post;
+					}
+
 				}
 			}
 
