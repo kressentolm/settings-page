@@ -15,7 +15,6 @@ class TCR_Calendar_Display {
         $this->previous_month = $date != null ? date("F", strtotime("-1 month", strtotime($date))) : null;
         $this->next_month = $date != null ? date("F", strtotime("+1 month", strtotime($date))) : null;
         $this->day_counter = 1;
-        var_dump($this->day_counter);
     }
 
     public function add_event($txt, $date, $days, $color = '') {
@@ -106,7 +105,6 @@ class TCR_Calendar_Display {
 
     private function dayHasEvent($event, $index) {
         for ($d = 0; $d <= ($event[2]); $d++) {
-            // var_dump($event[2]);
             if (date('y-m-d', strtotime($this->active_year . '-' . $this->active_month . '-' . $index . ' -' . $d . ' day')) == date('y-m-d', strtotime($event[1]))) {
                 return true;
             } else {
