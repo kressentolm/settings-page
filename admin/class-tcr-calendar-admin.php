@@ -193,22 +193,22 @@ class TCR_Calendar_Admin {
 	}
 
 	public function add_admin_columns($columns) {
-		$columns['start'] = __( 'Start Date', 'tcr' );
-		$columns['end'] = __( 'End Date', 'tcr' );
+		$columns['start'] = __('Start Date', 'tcr');
+		$columns['end'] = __('End Date', 'tcr');
 		return $columns;
 	}
 
-	function update_admin_columns( $column, $post_id ) {
+	function update_admin_columns($column, $post_id) {
 		// Image column
-		if ( 'start' === $column ) {
+		if ('start' === $column) {
 			$start = get_post_meta($post_id, 'tcr_event_start', true);
 			echo get_date_from_gmt($start, "m/d/Y");
 		}
-		if ( 'end' === $column ) {
+		if ('end' === $column) {
 			$end = get_post_meta($post_id, 'tcr_event_end', true);
 			echo get_date_from_gmt($end, "m/d/Y");
 		}
-	  }
+	}
 
 	// calendar_call
 	public function calendar_call() {
@@ -226,17 +226,14 @@ class TCR_Calendar_Admin {
 			$client = $this->getGoogleClient();
 			$calendarService = new Google_Service_Calendar($client);
 			$return_to_js_script = [];
-			
+
 			// Take events array and create or update 'tcr_event' post type with posts
 
 			// 1. Find all events that do not currently exist in DB and create them
-			// -- Check by Id from Google Calendar
-
 			// 2. Update all events that do exist in DB
-			// -- Check by Id from Google Calendar
-			
-			// TODO: Add option in settings to put in custom calendar ID, then consume here
-			$myCalendarID = "bjcv5ehrum2jc72t2b1h24gms8@group.calendar.google.com";
+			// -- Check both by Id from event from Google Calendar
+
+			$myCalendarID = get_option('tcr_calendar_google_calendar_id');
 
 			$existing_event_ids = [];
 			$events = $calendarService->events
@@ -247,20 +244,20 @@ class TCR_Calendar_Admin {
 					)
 				)->getItems();
 
-			$return_to_js_script['incoming_events_full'] = $events; 
+			$return_to_js_script['incoming_events_full'] = $events;
 
 			foreach ($events as $event) {
 				// If range of dates, comes through as `date` instead of `dateTime` from Google
 				// 2021-07-08T19:30:00-05:00
 				$start_date = isset($event->getStart()->dateTime) ?
-					gmdate('y-m-d', strtotime($event->getStart()->dateTime)) : 
-					gmdate('y-m-d', strtotime($event->getStart()->date)); 
-					
-				$end_date = isset($event->getEnd()->dateTime) ?  
-					gmdate('y-m-d', strtotime($event->getEnd()->dateTime)) : 
-					gmdate('y-m-d', strtotime($event->getEnd()->date)); 
-				
-					$incoming_events_array[] = array(
+					gmdate('y-m-d', strtotime($event->getStart()->dateTime)) :
+					gmdate('y-m-d', strtotime($event->getStart()->date));
+
+				$end_date = isset($event->getEnd()->dateTime) ?
+					gmdate('y-m-d', strtotime($event->getEnd()->dateTime)) :
+					gmdate('y-m-d', strtotime($event->getEnd()->date));
+
+				$incoming_events_array[] = array(
 					'id' => $event->getId(),
 					'title' => $event->getSummary(),
 					'start' => $start_date,
@@ -278,16 +275,16 @@ class TCR_Calendar_Admin {
 
 			$existing_gcal_ids = [];
 
-			foreach($existing_posts_ids as $id) {
+			foreach ($existing_posts_ids as $id) {
 				$gcal_id = get_post_meta($id, 'tcr_gcal_id', true);
 				if ($gcal_id) {
 					$existing_gcal_ids[] = $gcal_id;
 				}
 			}
-			
+
 			$posts_inserted = [];
 			$posts_updated = [];
-			
+
 			$return_to_js_script['existing_gcal_ids'] = $existing_gcal_ids;
 			$return_to_js_script['incoming_events_array'] = $incoming_events_array;
 			$return_to_js_script['existing_posts_id'] = $existing_posts_ids;
@@ -317,7 +314,7 @@ class TCR_Calendar_Admin {
 							'key'   => 'tcr_gcal_id',
 							'value' => $ev['id'],
 						),
-		
+
 					));
 
 					$existing_start = get_post_meta($updateable_post_id, 'tcr_event_start', true);
@@ -345,7 +342,6 @@ class TCR_Calendar_Admin {
 						));
 						$posts_updated[] = $updated_post;
 					}
-
 				}
 			}
 
@@ -416,18 +412,18 @@ class TCR_Calendar_Admin {
 		);
 		unset($args);
 
-		// Google Calendar API Key
+		// Google Calendar ID
 		add_settings_field(
-			'tcr_calendar_google_calendar_api_key',
-			'Google Calendar API Key',
+			'tcr_calendar_google_calendar_id',
+			'Google Calendar ID',
 			array($this, 'tcr_calendar_render_settings_field'),
 			'tcr_calendar_settings',
 			'tcr_calendar_general_section',
 			array(
 				'type'      => 'input',
 				'subtype'   => 'text',
-				'id'    => 'tcr_calendar_google_calendar_api_key',
-				'name'      => 'tcr_calendar_google_calendar_api_key',
+				'id'    => 'tcr_calendar_google_calendar_id',
+				'name'      => 'tcr_calendar_google_calendar_id',
 				'required' => 'true',
 				'get_options_list' => '',
 				'value_type' => 'normal',
@@ -436,7 +432,7 @@ class TCR_Calendar_Admin {
 		);
 		register_setting(
 			'tcr_calendar_settings',
-			'tcr_calendar_google_calendar_api_key'
+			'tcr_calendar_google_calendar_id'
 		);
 
 		// Enable automatic calendar sync

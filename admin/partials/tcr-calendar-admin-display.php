@@ -17,8 +17,7 @@
     <h2>Syncing your Calendar</h2>
     <p>Click the button below in order to sync with your Google Calendar. If you need to update the calendar to sync with, you can update your settings.</p>
     <input type="hidden" name="action" value="calendar_call" />
-    <!-- <input type="hidden" name="tcr_get_calendar_meta_nonce_form_nonce" value="<?php echo $tcr_get_calendar_meta_nonce; ?>" /> -->
-    <input type="submit" value="Sync Calendar" name="submit" id="submit" class="button button-primary button-large" />
+    <input type="submit" value="Manually Sync Calendar" name="submit" id="submit" class="button button-primary button-large" />
 </form>
 <div id="loader-area"></div>
 <!-- <div class="result_area"></div> -->

@@ -211,15 +211,6 @@ class TCR_Calendar_Display {
             }
         </style>
 <?php
-        // TODO: Use saved events instead of these hardcoded events from Google Cal that we are perusing through in the plugin
-
-        // TODO: Allow for clicking back/forth to get events within a month range:
-        // 1. Get previous and next month as links on top part of calendar
-        // 2. Remove clickability
-        // 3. Add option to turn off names (should always be off, but they may change their mind in the future)
-        // 4. Update styling and put into its own CSS file, if we need to.
-        // 5. Hook into calendar inside theme that consumes it.
-        // Note: format as -- $todays_date = date("Y/m/d");
 
         $today = date("y-m-d");
 
@@ -234,8 +225,6 @@ class TCR_Calendar_Display {
         // If we want to view the previous or next month
         $calendar = new TCR_Calendar_Display($calendar_month_to_show);
 
-        // TODO: Update to only get range for the month
-        // TODO: Add ability to look at next and previous month
         $events_list = get_posts(array(
             'post_type' => 'tcr_event',
             'numberposts' => -1
