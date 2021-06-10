@@ -29,7 +29,11 @@ class TCR_Calendar_Activator {
 	 *
 	 * @since    1.0.0
 	 */
+
 	public static function activate() {
-		//
+		if ( ! wp_next_scheduled( 'tcr_hourly_cron' ) ) {
+			wp_schedule_event( time(), 'hourly', 'tcr_hourly_cron' ); // tcr_hourly_cron is a hook
+	   }
 	}
+
 }

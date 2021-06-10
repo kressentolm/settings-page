@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "770f7a45e3964107abb4198a4ba5b018",
+    "content-hash": "54f83ad55303c30b3d87a68ed56f8681",
     "packages": [
         {
             "name": "firebase/php-jwt",
@@ -856,12 +856,53 @@
             ],
             "description": "A polyfill for getallheaders.",
             "time": "2019-03-08T08:55:37+00:00"
+        },
+        {
+            "name": "wpbp/cronplus",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/WPBP/CronPlus.git",
+                "reference": "3f0e83967429f3f21a307177c028236ac598eaf5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/WPBP/CronPlus/zipball/3f0e83967429f3f21a307177c028236ac598eaf5",
+                "reference": "3f0e83967429f3f21a307177c028236ac598eaf5",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "cronplus.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0"
+            ],
+            "authors": [
+                {
+                    "name": "Daniele Scasciafratte",
+                    "email": "mte90net@gmail.com",
+                    "homepage": "http://mte90.net"
+                }
+            ],
+            "description": "Add/Remove a WordPress Cron job easily",
+            "homepage": "https://github.com/WPBP/CronPlus",
+            "keywords": [
+                "cron",
+                "wordpress"
+            ],
+            "time": "2018-08-13T16:43:42+00:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "wpbp/cronplus": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

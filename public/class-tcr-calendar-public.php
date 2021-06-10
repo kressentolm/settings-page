@@ -100,4 +100,14 @@ class TCR_Calendar_Public {
 
 	}
 
+	public function update_calendar() {
+		var_dump('Did we get here?');
+		wp_die();
+		// TODO: Figure out why cron is not firing the below code. 
+		// Use the following (we already have it installed): https://github.com/WPBP/CronPlus
+		// Note: Might not be working locally? Maybe?
+		$class = new TCR_Calendar_Admin($this->plugin_name, $this->version);
+		$class->calendar_call();
+	}
+
 }
