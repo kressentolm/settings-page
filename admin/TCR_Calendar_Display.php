@@ -72,11 +72,10 @@ class TCR_Calendar_Display {
             foreach ($this->events as $event) {           
                 if ($this->dayHasEvent($event, $i)) {
                     $has_event = ' has-event';
-                    if ($event[2] > 1) {
-                        $this->day_counter = $event[2];
-                    }
                 }
             }
+
+            // wp_die();
 
             // If we have more than one day from the counter, it is also criteria to add as event day
             if ($this->day_counter > 1) {
@@ -86,12 +85,35 @@ class TCR_Calendar_Display {
             $html .= '<div class="day_num' . $selected . $has_event . '">';
             $html .= '<span>' . $i . '</span>';
             foreach ($this->events as $event) {
+
+                // Skip if already over 1, we want to cycle through the days of the event
+                if ($this->day_counter <= 1) {
+                    if ($event[2] > 1) {
+                        // Set day counter if incoming days more than one, we start the countdown
+                        $this->day_counter = $event[2];
+                        var_dump('begin countdown');
+                        var_dump($event);
+                        var_dump($this->day_counter);
+                    }
+                }
                 
                 if ($this->dayHasEvent($event, $i) || $this->day_counter > 1) {
                     $html .= '<div class="event' . $event[3] . '">';
                     $html .= $event[0];
                     $html .= '</div>';
                 }
+
+                // It should never be zero?
+                if ($this->day_counter < 1) {
+                    $this->day_counter = 1;
+                } else {
+                    // Count down counter for the number of days
+                    $this->day_counter = $this->day_counter - 1;
+                    var_dump('subtracted');
+                    var_dump($this->day_counter); 
+                    // TODO: I'm doing something silly. It's adding the event every time. I think the counter thing might be dumb. We might just want to put down the amount of days, from the days that come through the event itself, instead of counting down. That way, it can skip ahead. Since that is all we are doing -- blocking off parts of time. If we ever want to get this calendar working for different scenarios, this code will be very different. But for the current purpose, it's this: 1 day = 1 event; multiple days = 1 event, with multiple days, and just lay them down (essentially skip ahead and _assume_ nothing else is going on, because we don't care about.)
+                }
+                
             }
             $html .= '</div>';
         }
@@ -101,6 +123,7 @@ class TCR_Calendar_Display {
         $html .= '</div>';
         $html .= '</div>';
         return $html;
+        die();
     }
 
     private function dayHasEvent($event, $index) {
