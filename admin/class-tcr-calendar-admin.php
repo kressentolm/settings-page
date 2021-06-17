@@ -235,7 +235,7 @@ class TCR_Calendar_Admin {
 
 			$myCalendarID = get_option('tcr_calendar_google_calendar_id');
 
-			$existing_event_ids = [];
+			$incoming_event_ids = [];
 			$events = $calendarService->events
 				->listEvents(
 					$myCalendarID,
@@ -263,12 +263,13 @@ class TCR_Calendar_Admin {
 					'start' => $start_date,
 					'end' => $end_date
 				);
-				$existing_event_ids[] = $event->getId();
+				$incoming_event_ids[] = $event->getId();
 			}
 
+			$return_to_js_script['incoming_event_ids'] = $incoming_event_ids;
+
 			$existing_posts_ids = get_posts(array(
-				// 'fields' => 'ids', // Only get post IDs
-				'numberofposts' => -1,
+				'posts_per_page' => -1,
 				'post_type' => 'tcr_event',
 				'fields' => 'ids',
 			));
@@ -277,13 +278,14 @@ class TCR_Calendar_Admin {
 
 			foreach ($existing_posts_ids as $id) {
 				$gcal_id = get_post_meta($id, 'tcr_gcal_id', true);
-				if ($gcal_id) {
+				if (in_array($gcal_id, $incoming_event_ids)) {
 					$existing_gcal_ids[] = $gcal_id;
 				}
 			}
 
 			$posts_inserted = [];
 			$posts_updated = [];
+			$posts_skipped = [];
 
 			$return_to_js_script['existing_gcal_ids'] = $existing_gcal_ids;
 			$return_to_js_script['incoming_events_array'] = $incoming_events_array;
@@ -306,16 +308,13 @@ class TCR_Calendar_Admin {
 					$posts_inserted[] = $new_post;
 				} else {
 					$updateable_post_id = get_posts(array(
-						'numberofposts' => 1,
+						'posts_per_page' => 1,
 						'post_type' => 'tcr_event',
 						'fields' => 'ids',
-						'meta_query' =>
-						array(
-							'key'   => 'tcr_gcal_id',
-							'value' => $ev['id'],
-						),
-
-					));
+						'meta_key'   => 'tcr_gcal_id',
+    					'meta_value' => $ev['id'],
+						'post_status' => 'publish'
+					))[0];
 
 					$existing_start = get_post_meta($updateable_post_id, 'tcr_event_start', true);
 					$existing_end = get_post_meta($updateable_post_id, 'tcr_event_end', true);
@@ -325,8 +324,7 @@ class TCR_Calendar_Admin {
 					// TODO: Find good way to compare dates. Will be more performant if not having to update every post
 					if (
 						$existing_start !== $ev['start'] ||
-						$existing_end !== $ev['end'] ||
-						$existing_gcal_id !== $ev['id']
+						$existing_end !== $ev['end']
 					) {
 
 						// already exists, so just update
@@ -335,18 +333,34 @@ class TCR_Calendar_Admin {
 							'post_type' => 'tcr_event',
 							'post_title' => $ev['title'],
 							'meta_input' => array(
-								'tcr_gcal_id' => $ev['id'],
+								'tcr_gcal_id' => $existing_gcal_id,
 								'tcr_event_start' => $ev['start'],
 								'tcr_event_end' => $ev['end']
 							)
 						));
-						$posts_updated[] = $updated_post;
+						$updated_array = array(
+							'post_id' => $updated_post,
+							'post_meta_start' => $existing_start,
+							'post_meta_end' => $existing_end,
+							'incoming_start' => $ev['start'],
+							'incoming_end' => $ev['end'],
+						);
+						$posts_updated[] = $updated_array;
+					} else {
+						$skipped_array = array(
+							'post_id' => $updateable_post_id,
+							'start' => $existing_start,
+							'end' => $existing_end
+						);
+						$posts_skipped[] = $skipped_array;
 					}
 				}
 			}
 
-			$return_to_js_script['posts_inserted'] = count($posts_inserted);
-			$return_to_js_script['posts_updated'] = count($posts_updated);
+			$return_to_js_script['posts_inserted_count'] = count($posts_inserted);
+			$return_to_js_script['posts_updated_count'] = count($posts_updated);
+			$return_to_js_script['posts_updated'] = $posts_updated;
+			$return_to_js_script['posts_skipped'] = $posts_skipped;
 
 			echo json_encode($return_to_js_script);
 		} catch (\Exception $ex) {

@@ -59,10 +59,12 @@
                         let json_data = JSON.parse(response);
                         console.log(json_data);
                         if (json_data) {
-                            if (json_data.posts_inserted > 0) {
-                                loader.html("<strong>Successfully created " + json_data.posts_inserted + " new events!</strong>"); 
+                            if (json_data.posts_inserted_count > 0) {
+                                loader.html("<strong>Successfully created " + json_data.posts_inserted_count + " new events!</strong>"); 
+                            } else if (json_data.posts_inserted_count == 0 && json_data.posts_updated_count > 0) {
+                                loader.html("<strong>Successfully updated " + json_data.posts_updated_count + " existing events!</strong>"); 
                             } else {
-                                loader.html("<strong>No new events were found, though some might have updated.</strong>"); 
+                                loader.html("<strong>No new events were found, and no events needed to be updated.</strong>"); 
                             }
                             // + "and updated " + json_data.posts_updated + " events from Google Calendar</strong>");
                         }
