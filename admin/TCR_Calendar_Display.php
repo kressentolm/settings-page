@@ -6,20 +6,20 @@ class TCR_Calendar_Display {
 
     public function __construct($date = null) {
 
-        $this->today = date('d', strtotime(date("d")));
+        $this->today = date('y-m-d');
         $this->active_year = $date != null ? date('Y', strtotime($date)) : date('Y');
         $this->active_month = $date != null ? date('m', strtotime($date)) : date('m');
         $this->active_day = $date != null ? date('d', strtotime($date)) : date('d');
-        
+
         $this->current_month = date('F', strtotime(date('F')));
         $this->previous_month = $date != null ? date("F", strtotime("-1 month", strtotime($date))) : null;
         $this->next_month = $date != null ? date("F", strtotime("+1 month", strtotime($date))) : null;
         $this->day_counter = 1;
     }
 
-    public function add_event($txt, $date, $days, $color = '') {
+    public function add_event($txt, $date, $end, $days, $color = '') {
         $color = $color ? ' ' . $color : $color;
-        $this->events[] = [$txt, $date, $days, $color];
+        $this->events[] = [$txt, $date, $end, $days, $color];
     }
 
     public function __toString() {
@@ -35,15 +35,15 @@ class TCR_Calendar_Display {
         $html .= '</div>';
         $html .= "<div class='month-selector'>";
         if ($this->previous_month) {
-            $html .= '<button id="previous-month" class="month-selector" data-month-target="' . $this->previous_month. '"><span><<</span> ' 
-            . $this->previous_month . '</button>';
+            $html .= '<button id="previous-month" class="month-selector" data-month-target="' . $this->previous_month . '"><span><<</span> '
+                . $this->previous_month . '</button>';
         }
-        $html .= '<button id="current-month" class="month-selector" data-month-target="' 
-        . $this->current_month . '">Current Month</button>';
+        $html .= '<button id="current-month" class="month-selector" data-month-target="'
+            . $this->current_month . '">Current Month</button>';
         if ($this->next_month) {
-            $html .= '<button id="next-month" class="month-selector" data-month-target="' . $this->next_month. '">' . 
-            $this->next_month . ' <span>>></span></button>';
-        } 
+            $html .= '<button id="next-month" class="month-selector" data-month-target="' . $this->next_month . '">' .
+                $this->next_month . ' <span>>></span></button>';
+        }
         $html .= "</div>";
         $html .= '</div>';
         $html .= '<div class="days">';
@@ -54,6 +54,8 @@ class TCR_Calendar_Display {
                 </div>
             ';
         }
+
+        // Prev month days on calendar
         for ($i = $first_day_of_week; $i > 0; $i--) {
             $html .= '
                 <div class="day_num ignore"><span>
@@ -61,62 +63,34 @@ class TCR_Calendar_Display {
                 </span></div>
             ';
         }
+
+        // Cycle through calendar days
         for ($i = 1; $i <= $num_days; $i++) {
             $selected = '';
             $has_event = '';
-            if ($i == $this->active_day && $this->today == $this->active_day) {
+            $day_in_cycle = date('y-m-d', strtotime($this->active_year . '-' . $this->active_month . '-' . $i));
+
+            if ($i === (int)$this->active_day && $this->today == $day_in_cycle) {
                 $selected = ' selected';
             }
 
             // For each event, see if meets criteria
-            foreach ($this->events as $event) {           
-                if ($this->dayHasEvent($event, $i)) {
+            foreach ($this->events as $event) {
+
+                if ($this->meetsCriteria($event, $day_in_cycle, $i)) {
                     $has_event = ' has-event';
                 }
-            }
-
-            // wp_die();
-
-            // If we have more than one day from the counter, it is also criteria to add as event day
-            if ($this->day_counter > 1) {
-                $has_event = ' has-event';
+                
             }
 
             $html .= '<div class="day_num' . $selected . $has_event . '">';
             $html .= '<span>' . $i . '</span>';
-            foreach ($this->events as $event) {
+            $html .= '<div class="event red">';
+            $html .= "<p>Booked</p>"; // we could access $event[0] for description, but currently don't need it
+            $html .= '</div></div>';
 
-                // Skip if already over 1, we want to cycle through the days of the event
-                if ($this->day_counter <= 1) {
-                    if ($event[2] > 1) {
-                        // Set day counter if incoming days more than one, we start the countdown
-                        $this->day_counter = $event[2];
-                        var_dump('begin countdown');
-                        var_dump($event);
-                        var_dump($this->day_counter);
-                    }
-                }
-                
-                if ($this->dayHasEvent($event, $i) || $this->day_counter > 1) {
-                    $html .= '<div class="event' . $event[3] . '">';
-                    $html .= $event[0];
-                    $html .= '</div>';
-                }
-
-                // It should never be zero?
-                if ($this->day_counter < 1) {
-                    $this->day_counter = 1;
-                } else {
-                    // Count down counter for the number of days
-                    $this->day_counter = $this->day_counter - 1;
-                    var_dump('subtracted');
-                    var_dump($this->day_counter); 
-                    // TODO: I'm doing something silly. It's adding the event every time. I think the counter thing might be dumb. We might just want to put down the amount of days, from the days that come through the event itself, instead of counting down. That way, it can skip ahead. Since that is all we are doing -- blocking off parts of time. If we ever want to get this calendar working for different scenarios, this code will be very different. But for the current purpose, it's this: 1 day = 1 event; multiple days = 1 event, with multiple days, and just lay them down (essentially skip ahead and _assume_ nothing else is going on, because we don't care about.)
-                }
-                
-            }
-            $html .= '</div>';
         }
+        // Next month days on calendar
         for ($i = 1; $i <= (42 - $num_days - max($first_day_of_week, 0)); $i++) {
             $html .= '<div class="day_num ignore"><span>' . $i . '</span></div>';
         }
@@ -127,13 +101,22 @@ class TCR_Calendar_Display {
     }
 
     private function dayHasEvent($event, $index) {
-        for ($d = 0; $d <= ($event[2]); $d++) {
-            if (date('y-m-d', strtotime($this->active_year . '-' . $this->active_month . '-' . $index . ' -' . $d . ' day')) == date('y-m-d', strtotime($event[1]))) {
-                return true;
-            } else {
-                return false;
-            }
+        $current_date = date('y-m-d', strtotime($this->active_year . '-' . $this->active_month . '-' . $index));
+        $start = $event[1];
+
+        if ($current_date == $start) {
+            return true;
         }
+    }
+
+    private function meetsCriteria($event, $day_in_cycle, $i) {
+        $start = $event[1];
+        $end = $event[2];
+
+        $meets_criteria = ($day_in_cycle >= $start && $day_in_cycle <= $end)
+            || ($this->dayHasEvent($event, $i));
+
+        return $meets_criteria;
     }
 
     public function displayCalendar() {
@@ -197,7 +180,6 @@ class TCR_Calendar_Display {
                 font-size: 14px;
                 padding: 3px 6px;
                 border-radius: 4px;
-                background-color: #f7c30d;
                 color: #fff;
                 word-wrap: break-word;
             }
@@ -208,10 +190,6 @@ class TCR_Calendar_Display {
 
             .calendar .days .day_num .event.blue {
                 background-color: #518fce;
-            }
-
-            .calendar .days .day_num .event.red {
-                background-color: #ce5151;
             }
 
             .calendar .days .day_num:nth-child(7n+1) {
@@ -238,7 +216,7 @@ class TCR_Calendar_Display {
         $today = date("y-m-d");
 
         // Set date from cookie if exists
-        if(isset($_COOKIE['targetMonth'])) {
+        if (isset($_COOKIE['targetMonth'])) {
             $target_month = $_COOKIE['targetMonth'];
             $new_month = date("y-m-d", strtotime($target_month));
         }
@@ -256,13 +234,13 @@ class TCR_Calendar_Display {
         // Cycle through events to create calendar, based on current Month view
         foreach ($events_list as $item) {
 
-            
+
             $start = get_post_meta($item->ID, 'tcr_event_start', true);
             $end = get_post_meta($item->ID, 'tcr_event_end', true);
             $start_date = new DateTime($start);
             $end_date =  new DateTime($end);
             $difference = $start_date->diff($end_date);
-            $calendar->add_event($item->post_title, $start, $difference->d, 'red');
+            $calendar->add_event($item->post_title, $start, $end, $difference->d, 'red');
         }
         return $calendar;
     }
